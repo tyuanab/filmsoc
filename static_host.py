@@ -163,7 +163,7 @@ def static_aboutus():
     exco_sq = Exco.select()
 
     return render_template("aboutus.html", exco_sq=exco_sq,
-                            session="2013-2014")
+                            session="2014-2015")
 
 # register Blueprint
 app.register_blueprint(static_host, url_prefix='/static')
