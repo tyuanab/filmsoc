@@ -1,0 +1,17 @@
+*.log
+*.pot
+*.pyc
+local_settings.py
+
+#sublime-text 2
+*.sublime*
+
+#database
+*.db
+settings.py
+
+#profiling
+wsgi.prof
+
+#server use
+cronfile
