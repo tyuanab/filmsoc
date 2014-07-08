@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, 'c:/wamp/filmsoc')
+sys.path.insert(0, '/home/jowos/git/filmsoc')
 from filmsoc import app as application
 '''
 def application(environ, start_response):
@@ -12,3 +12,4 @@ def application(environ, start_response):
     
     return[output]
     '''
+

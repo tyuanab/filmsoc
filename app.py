@@ -15,7 +15,7 @@ if not app.debug:
     # Set up debug logging after production
     import logging
     from logging import Formatter
-    file_handler = logging.FileHandler(filename='c:/wamp/logs/film.log')
+    file_handler = logging.FileHandler(filename='film.log')
     file_handler.setLevel(logging.WARNING)
     file_handler.setFormatter(Formatter(
         '%(asctime)s %(levelname)s: %(message)s '
