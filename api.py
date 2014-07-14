@@ -1000,6 +1000,7 @@ read_auth = Authentication()
 api = JSONRestAPI(app, default_auth=admin_auth)
 
 # register resources
+# Params: (Model, ModelResource, authmethod)
 api.register(File, FileResource)
 api.register(User, UserResource)
 api.register(Log, LogResource, auth=read_auth)

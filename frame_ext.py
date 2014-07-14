@@ -227,7 +227,7 @@ class AdminAuthentication(BaseAuthentication):
 
 
 class Serializer(pSer):
-    """Fix a tranversal error in flask-peweee
+    """Fix a traversal error in flask-peewee
     """
     def clean_data(self, data):
         # it is possible that data itself is not a dict
