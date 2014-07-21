@@ -38,7 +38,7 @@ class CASAuth(Auth):
     """Extend Auth class to integrate with CAS authentication. Also
     added redirection after authentication
 
-    Note that all authentication in this class will result in 403
+    Note that [all authentication in this class]?[does it mean all DIRECT access?] will result in 403
     instead of an authentication page since the application only
     plays as a API
     """
