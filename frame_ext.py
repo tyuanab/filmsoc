@@ -182,8 +182,8 @@ class JSONRestAPI(RestAPI):
             # CRSF proof
             # check if the traffic comes from front server set
             referrer = request.referrer or ''
-            if not referrer.startswith(self.app.config['FRONT_SERVER']):
-                return jsonify(errno=403, error="Not Authorized")
+            '''if not referrer.startswith(self.app.config['FRONT_SERVER']):
+                return jsonify(errno=403, error="Not Authorized")'''
             try:
                 return func(*args, **kwargs)
             except BusinessException as e:
