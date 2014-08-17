@@ -336,6 +336,12 @@ class VoteForm(Form):
         AnyOf([1, 2, 3], message="Invalid Choice")
     ])
 
+class ShoppingVoteForm(Form):
+    """Used in voting of buying new disks
+    """
+    disk_id = f.IntegerField(u'disk_id',[
+        InputRequired(message="The disk to vote missing"),
+    ])
 
 class ApplyTicketForm(Form):
     """Used in application system of Preview Show Tickets

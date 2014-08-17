@@ -230,6 +230,8 @@ class Disk(LogModel):
         OnDelivery(checked out by exco for delivery),
         Voting(being voted for regular film show),
         Onshow(will be put on show on next regular film show)
+        //NEW OPTION by SYS
+        ShoppingVoting(still a draft, but open for voting for the next disk shopping)
 
     :param borrow_cnt:
         The total times the disk being borrowed
@@ -538,7 +540,7 @@ class RegularFilmShow(LogModel):
         if len(vote_log) >= 2:
             raise BusinessException("A member can vote at most twice", 3)
         if vote in vote_log:
-            raise BusinessException("You have voted before", 3)
+            raise BusinessException("You have voted for this one before", 3)
         # add vote count
         setattr(self,
                 "vote_cnt_%s" % vote, getattr(self, "vote_cnt_%s" % vote) + 1)
@@ -561,6 +563,7 @@ class RegularFilmShow(LogModel):
         user.rfs_count += 1
         self.participant_list.append(user.id)
 
+
     def to_show(self):
         """Return the disk that wins the Movote
         """
@@ -568,6 +571,98 @@ class RegularFilmShow(LogModel):
         return getattr(self, "film_%d" % idx)
 
 
+class Shopping(LogModel):
+    """Model for Shopping
+    :param id:
+        A unique ID of a show
+
+    :param state:
+        The state of a show, can only be one of the following:
+        Draft(editing, not visible to non-admins),
+        Ready(visible to everyone, not able to vote),
+        Voting(member able to vote),
+        Passed(only visible)
+    
+
+    """
+    id = PrimaryKeyField();
+
+    state = CharField(max_length=16);
+
+    film_1 = ForeignKeyField(Disk, related_name='dummy_1', null=True)
+    film_2 = ForeignKeyField(Disk, related_name='dummy_2', null=True)
+    film_3 = ForeignKeyField(Disk, related_name='dummy_3', null=True)
+    film_4 = ForeignKeyField(Disk, related_name='dummy_4', null=True)
+    film_5 = ForeignKeyField(Disk, related_name='dummy_5', null=True)
+    film_6 = ForeignKeyField(Disk, related_name='dummy_6', null=True)
+    film_7 = ForeignKeyField(Disk, related_name='dummy_7', null=True)
+    film_8 = ForeignKeyField(Disk, related_name='dummy_8', null=True)
+    
+
+    vote_cnt_1 = IntegerField(default=0)
+    vote_cnt_2 = IntegerField(default=0)
+    vote_cnt_3 = IntegerField(default=0) 
+    vote_cnt_4 = IntegerField(default=0)
+    vote_cnt_5 = IntegerField(default=0)
+    vote_cnt_6 = IntegerField(default=0) 
+    vote_cnt_7 = IntegerField(default=0)
+    vote_cnt_8 = IntegerField(default=0)
+
+    remarks = TextField(null=True)
+
+    class Meta:
+        order_by = ('-id',)
+
+    @classmethod
+    def get_recent(cls):
+        """Return the latest Shopping"""
+        return cls.select().where(
+            cls.state != "Draft"
+        ).order_by(cls.id.desc()).limit(1).get()
+
+    
+    def add_vote(self, user, vote):
+        """Add a user vote to the show
+
+        :param user:
+            The user who casts the vote
+        :param vote:
+            The film id voted for
+            can be 1, 2, 3, 4, 5, 6, 7, 8,
+            ><Too many~~~~
+            This makes me feel determined to develop another nosql backend.
+        """
+        '''
+        SYS: variable used as constant to indicate maximum votes
+        '''
+        votes_max=5
+
+        if self.state != 'Voting':
+            raise BusinessException("The show cannot be voted now", 3)
+        vote_log = [x.content[-1] for x in
+            Log.select().where(
+                Log.model == "Shopping",
+                Log.model_refer == self.id,
+                Log.log_type == "vote", Log.user_affected == user)]
+        votes_used=len(vote_log)
+        if votes_used>= votes_max:
+            raise BusinessException("A member can vote at most 5 times", 3)
+        if vote in vote_log:
+            raise BusinessException("You have voted for this before", 3)
+        # add vote count
+        setattr(self,
+                "vote_cnt_%s" % vote, getattr(self, "vote_cnt_%s" % vote) + 1)
+        # add log
+        Log.create(
+            model="Shopping", model_refer=self.id,
+            log_type="vote", user_affected=g.user,
+            content="member %s vote for film No. %s" % (user.itsc, vote))
+        '''
+        SYS: add_vote method should return an integer to indicate that you have how many votes to go.
+        '''
+        return (votes_max-votes_used)
+
+     
 class PreviewShowTicket(LogModel):
     """Model to store preview show tickets
 

@@ -695,6 +695,160 @@ class RegularFilmShowResource(LoggedRestResource):
 
         return self.response({})
 
+class ShoppingResource(LoggedRestResource):
+    """API of Shopping
+
+    Voting system is handled by this API
+    """
+    log_model = "Shopping"
+    validate_form = RegularFilmShowForm
+
+    readonly = [
+        'vote_cnt_1', 'vote_cnt_2',
+        'vote_cnt_3', 'vote_cnt_4',
+        'vote_cnt_5', 'vote_cnt_6',
+        'vote_cnt_7', 'vote_cnt_8',
+    ]
+
+    include_resources = {
+        'film_1': DiskResource,
+        'film_2': DiskResource,
+        'film_3': DiskResource,
+        'film_4': DiskResource,
+        'film_5': DiskResource,
+        'film_6': DiskResource,
+        'film_7': DiskResource,
+        'film_8': DiskResource,
+        'create_log': SimpleLogResource,
+    }
+
+    def get_query(self):
+        """Hide drafts to member"""
+        if g.user and g.user.admin:
+            return super(ShoppingResource, self).get_query()
+        else:
+            return self.model.select().where(self.model.state != "Draft")
+
+    def validate_data(self, data, obj=None):
+        data = super(ShoppingResource, self).validate_data(data, obj)
+        if g.modify_flag == 'edit':
+            if obj.state != 'Draft':
+                # Published show
+                if data.get('film_1', obj.film_1.id) != obj.film_1.id or \
+                        data.get('film_2', obj.film_2.id) != obj.film_2.id or \
+                        data.get('film_3', obj.film_3.id) != obj.film_3.id or \
+                        data.get('film_4', obj.film_4.id) != obj.film_4.id or \
+                        data.get('film_5', obj.film_5.id) != obj.film_5.id or \
+                        data.get('film_6', obj.film_6.id) != obj.film_6.id or \
+                        data.get('film_7', obj.film_7.id) != obj.film_7.id or \
+                        data.get('film_8', obj.film_8.id) != obj.film_8.id:
+                    raise BusinessException(
+                        "Cannot modify candidate film if not Draft")
+                if data['state'] == 'Draft':
+                    # Forbid such behaviour
+                    raise BusinessException("Cannot turn back to Draft")
+            if obj.state != 'Ready' and data['state'] == 'Ready':
+                # settting a show to open
+                # there can only be one open show at any time
+                if Shopping.select().where(
+                            Shopping.state == 'Ready'
+                        ).exists():
+                    raise BusinessException("There can be one Open Shopping"
+                                            " at a time")
+
+        return data
+
+    def prepare_data(self, obj, data):
+        if not (g.user and g.user.admin):
+        return data
+
+    def get_log(self, instance, id):
+        return "%s shopping id=%d" % (g.modify_flag, id)
+
+    def before_save(self, instance):
+        instance = super(ShoppingResource, self).before_save(instance)
+        #if this is the first time creating the instance
+        if instance.state == 'Ready':
+            # clear other shoppingvoting disks
+            sq = Disk.select().where(Disk.avail_type << ["ShoppingVoting"])
+            for disk in sq:
+                #flag them back to drafts
+                disk.avail_type = 'Draft'
+                disk.save()
+            # put disk on voting
+            for x in [1, 2, 3, 4, 5, 6, 7, 8]:
+                disk = getattr(instance, "film_%d" % x)
+                if disk.avail_type = 'Draft':
+                    disk.avail_type = 'ShoppingVoting'
+                    for y in ['reserved_by', 'hold_by', 'due_at']:
+                        setattr(disk, y, None)
+                    disk.save()
+                else raise BusinessException("only draft disks can be put onto shopping vote")
+
+        
+        # editing previous rfs will not change availability of disks
+        # set availability of corresponding disks
+        if instance.id == Shopping.get_recent().id:
+            if instance.state == 'Voting':
+                #SYS: no disk state needs change when a Shopping is flagged from ready to Voting
+                """# disks has the most vote
+                # a list containing instances for disks to buy
+                largest = instance.to_buy()
+
+                # clear other disk
+                # SYS: not needed for shopping vote, so far
+                
+                sq = Disk.select().where(Disk.avail_type << ['Voting', 'OnShow'])
+                for disk in sq:
+                    disk.avail_type = 'Available'
+                    disk.save()
+                
+                # set disk on show
+                for disk in largest:
+                    disk.avail_type = 'Shopping'
+                    disk.save()
+                """
+            #if instance is changed to Passed, flag all disks back to Draft so they can be available later.
+            elif instance.state == 'Passed':                
+                largest=instance.to_buy()
+                for x in [1, 2, 3, 4, 5, 6, 7, 8]:                    
+                    disk = getattr(instance, "film_%d" % x)
+                    if disk.avail_type == 'ShoppingVoting':
+                        disk.avail_tyoe = "Draft"
+                        disk.save()
+        return instance
+
+    def get_urls(self):
+        return (
+            ('/<pk>/vote/', self.require_method(self.api_vote, ['POST'])),            
+        ) + super(RegularFilmShowResource, self).get_urls()
+
+    '''
+    SYS: This is a special custom view function.
+    The biggest difference is that it returns a RESPONSE.
+    Cool, same as flask views.
+    '''
+    def api_vote(self, pk):
+        """API for Shoppingvote"""
+        obj = get_object_or_404(self.get_query(), self.pk == pk)
+        data = request.data or request.form.get("data") or ''
+
+        '''
+        SYS: data precheck only checks if the request data is integrate.
+        it won't bother if the data is logical or legal.
+        '''
+        data = self.data_precheck(data, ShoppingVoteForm)
+        if not g.user:
+            return self.response_forbidden()
+
+        votes_left=obj.add_vote(g.user, data['film_id'])
+        obj.save()
+
+        return self.response({"votes_left":votes_left,})
+
+    
+
+
 
 class PreviewShowTicketResource(LoggedRestResource):
     """API of Preview Show Tickets
@@ -1015,3 +1169,4 @@ api.register(Sponsor, SponsorResource)
 api.register(Exco, ExcoResource)
 api.register(SiteSettings, SiteSettingsResource)
 api.register(OneSentence, OneSentenceResource)
+api.register(Shopping, ShoppingResource)
