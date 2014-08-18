@@ -13,6 +13,7 @@ __all__ = [
     'Log',
     'Disk',
     'RegularFilmShow',
+    'Shopping',
     'PreviewShowTicket',
     'DiskReview',
     'News',
@@ -316,7 +317,7 @@ class Disk(LogModel):
         if user.reserved.count() >= reserve_limit:
             raise BusinessException(
                 ("A member can reserve at most %d disks"
-                " at the same time" % reserve_limit), 
+                " at the same time" % reserve_limit),
                 3)
         if self.avail_type != 'Available':
             raise BusinessException("Disk not reservable", 3)
@@ -370,7 +371,7 @@ class Disk(LogModel):
                 "Available", 'Reserved',
                 'ReservedCounter', 'OnDelivery']:
             raise BusinessException("The disk is not borrowable", 3)
-        
+
         self.reserved_by = None
         self.avail_type = "Borrowed"
         self.hold_by = user
@@ -389,7 +390,7 @@ class Disk(LogModel):
             raise BusinessException("Disk is overdue", 3)
         if not self.check_enable():
             raise BusinessException("VCD/DVD Library Closed", 3)
-        
+
         # check renew times
         last_log = Log.select().where(
                 Log.model == 'Disk', Log.model_refer == self.id,
@@ -453,10 +454,10 @@ class Disk(LogModel):
         new_log = Log(model='Disk', model_refer=self.id,
                         log_type='rate', user_affected=g.user)
         if rate == 'up':
-            new_log.content = ("member %s rate +1 for disk %s" % 
+            new_log.content = ("member %s rate +1 for disk %s" %
                                 (g.user.itsc, self.get_callnumber()))
         else:
-            new_log.content = ("member %s rate -1 for disk %s" % 
+            new_log.content = ("member %s rate -1 for disk %s" %
                                 (g.user.itsc, self.get_callnumber()))
 
         new_log.save()
@@ -495,9 +496,9 @@ class RegularFilmShow(LogModel):
     :param participant_list:
         A list of participants who attend this show
     """
-        
+
     id = PrimaryKeyField()
-  
+
     state = CharField(max_length=16)
 
     film_1 = ForeignKeyField(Disk, related_name='dummy_1', null=True)
@@ -582,29 +583,29 @@ class Shopping(LogModel):
         Ready(visible to everyone, not able to vote),
         Voting(member able to vote),
         Passed(only visible)
-    
+
 
     """
     id = PrimaryKeyField();
 
     state = CharField(max_length=16);
 
-    film_1 = ForeignKeyField(Disk, related_name='dummy_1', null=True)
-    film_2 = ForeignKeyField(Disk, related_name='dummy_2', null=True)
-    film_3 = ForeignKeyField(Disk, related_name='dummy_3', null=True)
-    film_4 = ForeignKeyField(Disk, related_name='dummy_4', null=True)
-    film_5 = ForeignKeyField(Disk, related_name='dummy_5', null=True)
-    film_6 = ForeignKeyField(Disk, related_name='dummy_6', null=True)
-    film_7 = ForeignKeyField(Disk, related_name='dummy_7', null=True)
-    film_8 = ForeignKeyField(Disk, related_name='dummy_8', null=True)
-    
+    film_1 = ForeignKeyField(Disk, null=True)
+    film_2 = ForeignKeyField(Disk, null=True)
+    film_3 = ForeignKeyField(Disk, null=True)
+    film_4 = ForeignKeyField(Disk, null=True)
+    film_5 = ForeignKeyField(Disk, null=True)
+    film_6 = ForeignKeyField(Disk, null=True)
+    film_7 = ForeignKeyField(Disk, null=True)
+    film_8 = ForeignKeyField(Disk, null=True)
+
 
     vote_cnt_1 = IntegerField(default=0)
     vote_cnt_2 = IntegerField(default=0)
-    vote_cnt_3 = IntegerField(default=0) 
+    vote_cnt_3 = IntegerField(default=0)
     vote_cnt_4 = IntegerField(default=0)
     vote_cnt_5 = IntegerField(default=0)
-    vote_cnt_6 = IntegerField(default=0) 
+    vote_cnt_6 = IntegerField(default=0)
     vote_cnt_7 = IntegerField(default=0)
     vote_cnt_8 = IntegerField(default=0)
 
@@ -620,7 +621,7 @@ class Shopping(LogModel):
             cls.state != "Draft"
         ).order_by(cls.id.desc()).limit(1).get()
 
-    
+
     def add_vote(self, user, vote):
         """Add a user vote to the show
 
@@ -662,7 +663,7 @@ class Shopping(LogModel):
         '''
         return (votes_max-votes_used)
 
-     
+
 class PreviewShowTicket(LogModel):
     """Model to store preview show tickets
 
