@@ -760,6 +760,7 @@ class ShoppingResource(LoggedRestResource):
 
     def prepare_data(self, obj, data):
         if not (g.user and g.user.admin):
+            pass
         return data
 
     def get_log(self, instance, id):
