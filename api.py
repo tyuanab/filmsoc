@@ -701,7 +701,7 @@ class ShoppingResource(LoggedRestResource):
     Voting system is handled by this API
     """
     log_model = "Shopping"
-    validate_form = RegularFilmShowForm
+    validate_form = ShoppingForm
 
     readonly = [
         'vote_cnt_1', 'vote_cnt_2',
