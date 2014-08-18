@@ -779,7 +779,7 @@ class ShoppingResource(LoggedRestResource):
             # put disk on voting
             for x in [1, 2, 3, 4, 5, 6, 7, 8]:
                 disk = getattr(instance, "film_%d" % x)
-                if disk.avail_type = 'Draft':
+                if disk.avail_type == 'Draft':
                     disk.avail_type = 'ShoppingVoting'
                     for y in ['reserved_by', 'hold_by', 'due_at']:
                         setattr(disk, y, None)
