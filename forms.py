@@ -122,6 +122,48 @@ RegularFilmShowForm = model_form(RegularFilmShow, field_args={
     'participant_list', 'create_log', 'vote_cnt_1', 'vote_cnt_2', 'vote_cnt_3',
 ), converter=Converter())
 
+"""Used on Shopping Model
+"""
+ShoppingForm = model_form(Shopping,field_args={
+    'state':dict(validators=[
+        InputRequired(message="Shopping state Missing"),
+        AnyOf(['Draft','Ready','Voting','Passed'], message="Invalid Shopping State")
+    ]),
+    'film_1': dict(validators=[
+        InstanceExist(Disk, message="Non exist Film #1")
+    ]),
+    'film_2': dict(validators=[
+        Optional(),
+        InstanceExist(Disk, message="Non exist Film #2")
+    ]),
+    'film_3': dict(validators=[
+        Optional(),
+        InstanceExist(Disk, message="Non exist Film #2")
+    ]),
+    'film_4': dict(validators=[
+        Optional(),
+        InstanceExist(Disk, message="Non exist Film #2")
+    ]),
+    'film_5': dict(validators=[
+        Optional(),
+        InstanceExist(Disk, message="Non exist Film #2")
+    ]),
+    'film_6': dict(validators=[
+        Optional(),
+        InstanceExist(Disk, message="Non exist Film #2")
+    ]),
+    'film_7': dict(validators=[
+        Optional(),
+        InstanceExist(Disk, message="Non exist Film #2")
+    ]),
+    'film_8': dict(validators=[
+        Optional(),
+        InstanceExist(Disk, message="Non exist Film #2")
+    ]),
+}, exclude=(
+    'create_log', 'vote_cnt_1', 'vote_cnt_2', 'vote_cnt_3', 'vote_cnt_4', 'vote_cnt_5', 'vote_cnt_6', 'vote_cnt_7', 'vote_cnt_8'
+),converter=Converter())
+
 
 """Used on PreviewShowTicket Model
 """
