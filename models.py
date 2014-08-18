@@ -590,14 +590,14 @@ class Shopping(LogModel):
 
     state = CharField(max_length=16);
 
-    film_1 = ForeignKeyField(Disk, null=True)
-    film_2 = ForeignKeyField(Disk, null=True)
-    film_3 = ForeignKeyField(Disk, null=True)
-    film_4 = ForeignKeyField(Disk, null=True)
-    film_5 = ForeignKeyField(Disk, null=True)
-    film_6 = ForeignKeyField(Disk, null=True)
-    film_7 = ForeignKeyField(Disk, null=True)
-    film_8 = ForeignKeyField(Disk, null=True)
+    film_1 = ForeignKeyField(Disk,related_name='shopping_1',null=True)
+    film_2 = ForeignKeyField(Disk,related_name='shopping_2', null=True)
+    film_3 = ForeignKeyField(Disk,related_name='shopping_3', null=True)
+    film_4 = ForeignKeyField(Disk,related_name='shopping_4', null=True)
+    film_5 = ForeignKeyField(Disk,related_name='shopping_5', null=True)
+    film_6 = ForeignKeyField(Disk,related_name='shopping_6', null=True)
+    film_7 = ForeignKeyField(Disk,related_name='shopping_7', null=True)
+    film_8 = ForeignKeyField(Disk,related_name='shopping_8', null=True)
 
 
     vote_cnt_1 = IntegerField(default=0)
