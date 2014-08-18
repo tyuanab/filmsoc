@@ -15,6 +15,7 @@ __all__ = [
     'UserForm',
     'DiskForm',
     'RegularFilmShowForm',
+    'ShoppingForm',
     'PreviewShowTicketForm',
     'DiskReviewForm',
     'NewsForm',
@@ -28,6 +29,7 @@ __all__ = [
     'SubmitUserForm',
     'RateForm',
     'VoteForm',
+    'ShoppingVoteForm',
     'ApplyTicketForm',
     'RelationForm',
 ]
