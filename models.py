@@ -759,7 +759,6 @@ class PreviewShowTicket(LogModel):
                 Log.model_refer == self.id,
                 Log.user_affected == user).exists():
             raise BusinessException("", 0)
-
         # send email to EVP
         mail_content = render_template(
             'ticket_apply.html', ticket=self, member=user,
