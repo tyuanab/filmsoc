@@ -631,27 +631,29 @@ class RegularFilmShowResource(LoggedRestResource):
                 disk.save()
 
         # set availability of corresponding disks
-        if instance.id == RegularFilmShow.get_recent().id:
-            # editing previous rfs will not change availability of disks
-            if instance.state == 'Pending':
-                # disk has the most vote
-                largest = instance.to_show()
+        #SYS: fix issue when there are none
+        if RegularFilmShow.select().exists():
+            if instance.id == RegularFilmShow.get_recent().id:
+                # editing previous rfs will not change availability of disks
+                if instance.state == 'Pending':
+                    # disk has the most vote
+                    largest = instance.to_show()
 
-                # clear other disk
-                sq = Disk.select().where(Disk.avail_type << ['Voting', 'OnShow'])
-                for disk in sq:
-                    disk.avail_type = 'Available'
-                    disk.save()
-
-                # set disk on show
-                largest.avail_type = 'Onshow'
-                largest.save()
-            elif instance.state == 'Passed':
-                for x in [1, 2, 3]:
-                    disk = getattr(instance, "film_%d" % x)
-                    if disk.avail_type == 'Voting' or disk.avail_type == 'Onshow':
+                    # clear other disk
+                    sq = Disk.select().where(Disk.avail_type << ['Voting', 'OnShow'])
+                    for disk in sq:
                         disk.avail_type = 'Available'
                         disk.save()
+
+                    # set disk on show
+                    largest.avail_type = 'Onshow'
+                    largest.save()
+                elif instance.state == 'Passed':
+                    for x in [1, 2, 3]:
+                        disk = getattr(instance, "film_%d" % x)
+                        if disk.avail_type == 'Voting' or disk.avail_type == 'Onshow':
+                            disk.avail_type = 'Available'
+                            disk.save()
         return instance
 
     def get_urls(self):
@@ -789,35 +791,37 @@ class ShoppingResource(LoggedRestResource):
 
         # editing previous rfs will not change availability of disks
         # set availability of corresponding disks
-        if instance.id == Shopping.get_recent().id:
-            if instance.state == 'Voting':
-                #SYS: no disk state needs change when a Shopping is flagged from ready to Voting
-                """# disks has the most vote
-                # a list containing instances for disks to buy
-                largest = instance.to_buy()
+        #SYS: fix issue when there are none
+        if Shopping.select().exists():
+            if instance.id == Shopping.get_recent().id:
+                if instance.state == 'Voting':
+                    #SYS: no disk state needs change when a Shopping is flagged from ready to Voting
+                    """# disks has the most vote
+                    # a list containing instances for disks to buy
+                    largest = instance.to_buy()
 
-                # clear other disk
-                # SYS: not needed for shopping vote, so far
+                    # clear other disk
+                    # SYS: not needed for shopping vote, so far
 
-                sq = Disk.select().where(Disk.avail_type << ['Voting', 'OnShow'])
-                for disk in sq:
-                    disk.avail_type = 'Available'
-                    disk.save()
-
-                # set disk on show
-                for disk in largest:
-                    disk.avail_type = 'Shopping'
-                    disk.save()
-                """
-            #if instance is changed to Passed, flag all disks back to Draft so they can be available later.
-            elif instance.state == 'Passed':
-                largest=instance.to_buy()
-                for x in [1, 2, 3, 4, 5, 6, 7, 8]:
-                    disk = getattr(instance, "film_%d" % x)
-                    if disk.avail_type == 'ShoppingVoting':
-                        disk.avail_tyoe = "Draft"
+                    sq = Disk.select().where(Disk.avail_type << ['Voting', 'OnShow'])
+                    for disk in sq:
+                        disk.avail_type = 'Available'
                         disk.save()
-        return instance
+
+                    # set disk on show
+                    for disk in largest:
+                        disk.avail_type = 'Shopping'
+                        disk.save()
+                    """
+                #if instance is changed to Passed, flag all disks back to Draft so they can be available later.
+                elif instance.state == 'Passed':
+                    largest=instance.to_buy()
+                    for x in [1, 2, 3, 4, 5, 6, 7, 8]:
+                        disk = getattr(instance, "film_%d" % x)
+                        if disk.avail_type == 'ShoppingVoting':
+                            disk.avail_tyoe = "Draft"
+                            disk.save()
+            return instance
 
     def get_urls(self):
         return (
