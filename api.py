@@ -170,7 +170,7 @@ class UserResource(HookedResource):
         """Check the validity of member information
         """
         data = self.data_precheck(data, UserForm)
-        
+
         data['itsc'] = data['itsc'].lower()
         # validate uniqueness
         if g.modify_flag == 'create':
@@ -300,7 +300,7 @@ class UserResource(HookedResource):
         # university id should be unique
         if User.select().where(User.university_id == data['university_id']).exists():
             return jsonify(errno=3, error="Duplicate University ID of other member")
-        
+
         # apply change
         obj.university_id = data['university_id']
         obj.save()
@@ -477,7 +477,7 @@ class DiskResource(LoggedRestResource):
                     return jsonify(errno=3, error="Disk not borrowed by the user")
                 if not self.check_post(obj) and req_user != g.user:
                     return self.response_forbidden()
-                
+
                 # renew it
                 obj.renew()
                 new_log.content = ("member %s renews disk %s" %
@@ -491,7 +491,7 @@ class DiskResource(LoggedRestResource):
                     return self.response_forbidden()
 
                 obj.deliver()
-                new_log.content = ("take out disk %s for delivery" % 
+                new_log.content = ("take out disk %s for delivery" %
                                     obj.get_callnumber())
                 new_log.user_affected = req_user
                 new_log.admin_involved = g.user
@@ -784,9 +784,9 @@ class ShoppingResource(LoggedRestResource):
                     for y in ['reserved_by', 'hold_by', 'due_at']:
                         setattr(disk, y, None)
                     disk.save()
-                else raise BusinessException("only draft disks can be put onto shopping vote")
+                else: raise BusinessException("only draft disks can be put onto shopping vote")
 
-        
+
         # editing previous rfs will not change availability of disks
         # set availability of corresponding disks
         if instance.id == Shopping.get_recent().id:
@@ -798,21 +798,21 @@ class ShoppingResource(LoggedRestResource):
 
                 # clear other disk
                 # SYS: not needed for shopping vote, so far
-                
+
                 sq = Disk.select().where(Disk.avail_type << ['Voting', 'OnShow'])
                 for disk in sq:
                     disk.avail_type = 'Available'
                     disk.save()
-                
+
                 # set disk on show
                 for disk in largest:
                     disk.avail_type = 'Shopping'
                     disk.save()
                 """
             #if instance is changed to Passed, flag all disks back to Draft so they can be available later.
-            elif instance.state == 'Passed':                
+            elif instance.state == 'Passed':
                 largest=instance.to_buy()
-                for x in [1, 2, 3, 4, 5, 6, 7, 8]:                    
+                for x in [1, 2, 3, 4, 5, 6, 7, 8]:
                     disk = getattr(instance, "film_%d" % x)
                     if disk.avail_type == 'ShoppingVoting':
                         disk.avail_tyoe = "Draft"
@@ -821,8 +821,8 @@ class ShoppingResource(LoggedRestResource):
 
     def get_urls(self):
         return (
-            ('/<pk>/vote/', self.require_method(self.api_vote, ['POST'])),            
-        ) + super(RegularFilmShowResource, self).get_urls()
+            ('/<pk>/vote/', self.require_method(self.api_vote, ['POST'])),
+        ) + super(ShoppingResource, self).get_urls()
 
     '''
     SYS: This is a special custom view function.
@@ -847,7 +847,7 @@ class ShoppingResource(LoggedRestResource):
 
         return self.response({"votes_left":votes_left,})
 
-    
+
 
 
 
@@ -900,7 +900,7 @@ class PreviewShowTicketResource(LoggedRestResource):
         Log.create(
             model="PreviewShowTicket", log_type='apply',
             model_refer=obj.id, user_affected=g.user,
-            content=("member %s apply for ticket id=%d" % 
+            content=("member %s apply for ticket id=%d" %
                 (g.user.itsc, obj.id))
         )
 

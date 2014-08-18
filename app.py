@@ -16,7 +16,7 @@ if not app.debug:
     import logging
     from logging import Formatter
     file_handler = logging.FileHandler(filename='film.log')
-    file_handler.setLevel(logging.WARNING)
+    file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(Formatter(
         '%(asctime)s %(levelname)s: %(message)s '
         '[in %(pathname)s:%(lineno)d]'
