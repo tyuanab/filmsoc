@@ -823,7 +823,7 @@ class ShoppingResource(LoggedRestResource):
                             setattr(disk, y, None)
                         disk.save()
                     else:
-                        raise BusinessException("disk index:"+x+", only draft disks can be put onto shopping vote")
+                        raise BusinessException("disk index:"+str(x)+", only draft disks can be put onto shopping vote")
             else:
                 raise BusinessException("no shopping can directly get voting or passed without being Ready")
         elif oldState=='Ready':
