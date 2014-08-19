@@ -818,6 +818,7 @@ class ShoppingResource(LoggedRestResource):
                 for x in [1, 2, 3, 4, 5, 6, 7, 8]:
                     disk = getattr(instance, "film_%d" % x)
                     if disk.avail_type == 'Draft':
+                        raise BusinessException("avail_type for disk is:"+disk.avail_type)
                         disk.avail_type = 'ShoppingVoting'
                         for y in ['reserved_by', 'hold_by', 'due_at']:
                             setattr(disk, y, None)
@@ -838,7 +839,7 @@ class ShoppingResource(LoggedRestResource):
                 raise BusinessException("You haven't voted for it yet!")
         elif oldState=='Voting':
             if newState=='Draft' or newState=='Ready':
-                raise BusinessException("ah-oh! time doesn't goes backward")
+                raise BusinessException("ah-oh! time doesn't go backward")
             if newState=='Voting':
                 pass
             if newState=='Passed':
