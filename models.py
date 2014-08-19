@@ -617,10 +617,13 @@ class Shopping(LogModel):
     @classmethod
     def get_recent(cls):
         """Return the latest Shopping"""
-        return cls.select().where(
-            cls.state != "Draft"
-        ).order_by(cls.id.desc()).limit(1).get()
-
+        try:
+            obj = cls.select().where(
+                cls.state != "Draft"
+            ).order_by(cls.id.desc()).limit(1).get()
+            return obj
+        except:
+            raise BusinessException(sys.exc_info()[0])
 
     def add_vote(self, user, vote):
         """Add a user vote to the show
