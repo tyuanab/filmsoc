@@ -590,7 +590,7 @@ class Shopping(LogModel):
 
     state = CharField(max_length=16);
 
-    film_1 = ForeignKeyField(Disk,related_name='shopping_1',null=True)
+    film_1 = ForeignKeyField(Disk,related_name='shopping_1', null=True)
     film_2 = ForeignKeyField(Disk,related_name='shopping_2', null=True)
     film_3 = ForeignKeyField(Disk,related_name='shopping_3', null=True)
     film_4 = ForeignKeyField(Disk,related_name='shopping_4', null=True)
@@ -665,7 +665,7 @@ class Shopping(LogModel):
         '''
         SYS: add_vote method should return an integer to indicate that you have how many votes to go.
         '''
-        return (votes_max-votes_used)
+        return (votes_max-votes_used-1)
 
 
 class PreviewShowTicket(LogModel):
