@@ -383,7 +383,7 @@ class VoteForm(Form):
 class ShoppingVoteForm(Form):
     """Used in voting of buying new disks
     """
-    disk_id = f.IntegerField(u'disk_id',[
+    film_id = f.IntegerField(u'shopping_id',[
         InputRequired(message="The disk to vote missing"),
     ])
 
