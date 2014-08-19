@@ -6,7 +6,6 @@ from peewee import *
 from frame_ext import IterableModel, BusinessException
 from db_ext import SimpleListField
 from helpers import send_email
-import sys
 
 __all__ = [
     'File',
@@ -624,7 +623,7 @@ class Shopping(LogModel):
             ).order_by(cls.id.desc()).limit(1).get()
             return obj
         except:
-            raise BusinessException(sys.exc_info()[0])
+            raise BusinessException('error retrieving most recent non-draft record')
 
     def add_vote(self, user, vote):
         """Add a user vote to the show
