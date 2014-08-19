@@ -771,7 +771,7 @@ class ShoppingResource(LoggedRestResource):
 
     def before_save(self, instance):
         instance = super(ShoppingResource, self).before_save(instance)
-        #if this is the first time creating the instance
+        
         if instance.state == 'Ready':
             # clear other shoppingvoting disks
             sq = Disk.select().where(Disk.avail_type << ["ShoppingVoting"])
@@ -815,6 +815,7 @@ class ShoppingResource(LoggedRestResource):
                         disk.avail_type = 'Shopping'
                         disk.save()
                     """
+                    pass
                 #if instance is changed to Passed, flag all disks back to Draft so they can be available later.
                 elif instance.state == 'Passed':
                     for x in [1, 2, 3, 4, 5, 6, 7, 8]:
