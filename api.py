@@ -818,7 +818,6 @@ class ShoppingResource(LoggedRestResource):
                 for x in [1, 2, 3, 4, 5, 6, 7, 8]:
                     disk = getattr(instance, "film_%d" % x)
                     if disk.avail_type == 'Draft':
-                        raise BusinessException("avail_type for disk is:"+disk.avail_type)
                         disk.avail_type = 'ShoppingVoting'
                         for y in ['reserved_by', 'hold_by', 'due_at']:
                             setattr(disk, y, None)
@@ -847,7 +846,7 @@ class ShoppingResource(LoggedRestResource):
                 for x in [1, 2, 3, 4, 5, 6, 7, 8]:
                     disk = getattr(instance, "film_%d" % x)
                     if disk.avail_type == 'ShoppingVoting':
-                        disk.avail_tyoe = "Draft"
+                        disk.avail_type = "Draft"
                         disk.save()
         elif oldState=='Passed':
             if not newState=='Passed':
