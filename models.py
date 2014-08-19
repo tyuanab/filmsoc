@@ -6,6 +6,7 @@ from peewee import *
 from frame_ext import IterableModel, BusinessException
 from db_ext import SimpleListField
 from helpers import send_email
+import sys
 
 __all__ = [
     'File',
