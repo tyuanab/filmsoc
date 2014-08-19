@@ -403,7 +403,7 @@ class DiskResource(LoggedRestResource):
         if g.user and g.user.admin:
             return super(DiskResource, self).get_query()
         else:
-            return self.model.select().where(self.model.avail_type != "Draft")
+            return self.model.select().where(self.model.avail_type != "Draft" && self.model.avail_type != "ShoppingVoting")
 
     def api_reserve(self, pk):
         """API to reserve a disk"""
