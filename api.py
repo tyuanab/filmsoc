@@ -766,7 +766,7 @@ class ShoppingResource(LoggedRestResource):
         oldState=None
         if Shopping.select().where(Shopping.id==id).exists():
             oldState=Shopping.select().where(Shopping.id==id).get().state
-        if oldState=None:
+        if oldState==None:
             #This is a new instance
             if newState=='Draft':
                 pass
