@@ -633,6 +633,7 @@ class RegularFilmShowResource(LoggedRestResource):
         # set availability of corresponding disks
         #SYS: fix issue when there are none
         if RegularFilmShow.select().exists():
+            #only when the instance being modified is the latest non-draft record
             if instance.id == RegularFilmShow.get_recent().id:
                 # editing previous rfs will not change availability of disks
                 if instance.state == 'Pending':
@@ -747,18 +748,6 @@ class ShoppingResource(LoggedRestResource):
                         data.get('film_8', obj.film_8.id) != obj.film_8.id:
                     raise BusinessException(
                         "Cannot modify candidate film if not Draft")
-                if data['state'] == 'Draft':
-                    # Forbid such behaviour
-                    raise BusinessException("Cannot turn back to Draft")
-            if obj.state != 'Ready' and data['state'] == 'Ready':
-                # settting a shopping to open
-                # there can only be one open show at any time
-                if Shopping.select().where(
-                            Shopping.state == 'Ready'
-                        ).exists():
-                    raise BusinessException("There can be one Ready Shopping"
-                                            " at a time")
-
         return data
 
     def prepare_data(self, obj, data):
@@ -771,58 +760,99 @@ class ShoppingResource(LoggedRestResource):
 
     def before_save(self, instance):
         instance = super(ShoppingResource, self).before_save(instance)
-        
-        if instance.state == 'Ready':
-            # clear other shoppingvoting disks
-            sq = Disk.select().where(Disk.avail_type << ["ShoppingVoting"])
-            for disk in sq:
-                #flag them back to drafts
-                disk.avail_type = 'Draft'
-                disk.save()
-            # put disk on voting
-            for x in [1, 2, 3, 4, 5, 6, 7, 8]:
-                disk = getattr(instance, "film_%d" % x)
-                if disk.avail_type == 'Draft':
-                    disk.avail_type = 'ShoppingVoting'
-                    for y in ['reserved_by', 'hold_by', 'due_at']:
-                        setattr(disk, y, None)
+
+        id=instance.id
+        newState=instance.state
+        oldState=None
+        if Shopping.select().where(Shopping.id==id).exists():
+            oldState=Shopping.select().where(Shopping.id==id).get().state
+        if oldState=None:
+            #This is a new instance
+            if newState=='Draft':
+                pass
+            elif newState=='Ready':
+                # setting a shopping to ready
+                # there can only be one ready or voting shopping at any time
+                if Shopping.select().where(
+                            Shopping.state == 'Ready' or Shopping.state=='Voting'
+                        ).exists():
+                    raise BusinessException("There can be only one available Shopping"
+                                            " at a time")
+                # clear other shoppingvoting disks
+                sq = Disk.select().where(Disk.avail_type << ["ShoppingVoting"])
+                for disk in sq:
+                    #flag them back to drafts
+                    disk.avail_type = 'Draft'
                     disk.save()
-                else:
-                    raise BusinessException("only draft disks can be put onto shopping vote")
-
-
-        # editing previous rfs will not change availability of disks
-        # set availability of corresponding disks
-        #SYS: fix issue when there are none
-        if Shopping.select().exists():
-            if instance.id == Shopping.get_recent().id:
-                if instance.state == 'Voting':
-                    #SYS: no disk state needs change when a Shopping is flagged from ready to Voting
-                    """# disks has the most vote
-                    # a list containing instances for disks to buy
-                    largest = instance.to_buy()
-
-                    # clear other disk
-                    # SYS: not needed for shopping vote, so far
-
-                    sq = Disk.select().where(Disk.avail_type << ['Voting', 'OnShow'])
-                    for disk in sq:
-                        disk.avail_type = 'Available'
+                # put disk on voting
+                for x in [1, 2, 3, 4, 5, 6, 7, 8]:
+                    disk = getattr(instance, "film_%d" % x)
+                    if disk.avail_type == 'Draft':
+                        disk.avail_type = 'ShoppingVoting'
+                        for y in ['reserved_by', 'hold_by', 'due_at']:
+                            setattr(disk, y, None)
                         disk.save()
-
-                    # set disk on show
-                    for disk in largest:
-                        disk.avail_type = 'Shopping'
+                    else:
+                        raise BusinessException("disk index:"+x+", only draft disks can be put onto shopping vote")
+            else:
+                raise BusinessException("don't jump too fast!")
+        elif oldState=='Draft':
+            #The instance was originally a draft.
+            if newState=='Draft':
+                pass
+            elif newState=='Ready':
+                # setting a shopping to ready
+                # there can only be one ready or voting shopping at any time
+                if Shopping.select().where(
+                            Shopping.state == 'Ready' or Shopping.state=='Voting'
+                        ).exists():
+                    raise BusinessException("There can be only one available Shopping"
+                                            " at a time")
+                # clear other shoppingvoting disks
+                sq = Disk.select().where(Disk.avail_type << ["ShoppingVoting"])
+                for disk in sq:
+                    #flag them back to drafts
+                    disk.avail_type = 'Draft'
+                    disk.save()
+                # put disk on voting
+                for x in [1, 2, 3, 4, 5, 6, 7, 8]:
+                    disk = getattr(instance, "film_%d" % x)
+                    if disk.avail_type == 'Draft':
+                        disk.avail_type = 'ShoppingVoting'
+                        for y in ['reserved_by', 'hold_by', 'due_at']:
+                            setattr(disk, y, None)
                         disk.save()
-                    """
-                    pass
-                #if instance is changed to Passed, flag all disks back to Draft so they can be available later.
-                elif instance.state == 'Passed':
-                    for x in [1, 2, 3, 4, 5, 6, 7, 8]:
-                        disk = getattr(instance, "film_%d" % x)
-                        if disk.avail_type == 'ShoppingVoting':
-                            disk.avail_tyoe = "Draft"
-                            disk.save()
+                    else:
+                        raise BusinessException("disk index:"+x+", only draft disks can be put onto shopping vote")
+            else:
+                raise BusinessException("no shopping can directly get voting or passed without being Ready")
+        elif oldState=='Ready':
+            if newState=='Draft':
+                raise BusinessException("Cannot change Ready stuff back to Draft. Think twice next time.")
+            elif newState=='Ready':
+                pass
+            elif newState=='Voting':
+                #cuz nothing needs change here
+                pass
+            else:
+                raise BusinessException("You haven't voted for it yet!")
+        elif oldState=='Voting':
+            if newState=='Draft' or newState=='Ready':
+                raise BusinessException("ah-oh! time doesn't goes backward")
+            if newState=='Voting':
+                pass
+            if newState=='Passed':
+                #flag all the disks back to draft
+                for x in [1, 2, 3, 4, 5, 6, 7, 8]:
+                    disk = getattr(instance, "film_%d" % x)
+                    if disk.avail_type == 'ShoppingVoting':
+                        disk.avail_tyoe = "Draft"
+                        disk.save()
+        elif oldState=='Passed':
+            if not newState=='Passed':
+                raise BusinessException("You can't go back! Sorry!")
+            else:
+                pass
         return instance
 
     def get_urls(self):

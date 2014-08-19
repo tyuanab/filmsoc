@@ -614,6 +614,7 @@ class Shopping(LogModel):
     class Meta:
         order_by = ('-id',)
 
+    #method for retrieving the newest non-draft record
     @classmethod
     def get_recent(cls):
         """Return the latest Shopping"""
