@@ -376,7 +376,10 @@ class HookedResource(RestResource):
         return (g.user and g.user.admin)
 
     def validate_data(self, data, obj=None):
-        """Check the validity of data submitted
+        """
+        **CUSTOM METHOD**
+
+        Check the validity of data submitted
 
         only used on creation, and edition.
 

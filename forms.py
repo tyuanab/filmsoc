@@ -140,27 +140,27 @@ ShoppingForm = model_form(Shopping,field_args={
     ]),
     'film_3': dict(validators=[
         Optional(),
-        InstanceExist(Disk, message="Non exist Film #2")
+        InstanceExist(Disk, message="Non exist Film #3")
     ]),
     'film_4': dict(validators=[
         Optional(),
-        InstanceExist(Disk, message="Non exist Film #2")
+        InstanceExist(Disk, message="Non exist Film #4")
     ]),
     'film_5': dict(validators=[
         Optional(),
-        InstanceExist(Disk, message="Non exist Film #2")
+        InstanceExist(Disk, message="Non exist Film #5")
     ]),
     'film_6': dict(validators=[
         Optional(),
-        InstanceExist(Disk, message="Non exist Film #2")
+        InstanceExist(Disk, message="Non exist Film #6")
     ]),
     'film_7': dict(validators=[
         Optional(),
-        InstanceExist(Disk, message="Non exist Film #2")
+        InstanceExist(Disk, message="Non exist Film #7")
     ]),
     'film_8': dict(validators=[
         Optional(),
-        InstanceExist(Disk, message="Non exist Film #2")
+        InstanceExist(Disk, message="Non exist Film #8")
     ]),
 }, exclude=(
     'create_log', 'vote_cnt_1', 'vote_cnt_2', 'vote_cnt_3', 'vote_cnt_4', 'vote_cnt_5', 'vote_cnt_6', 'vote_cnt_7', 'vote_cnt_8'

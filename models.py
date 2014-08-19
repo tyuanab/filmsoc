@@ -628,7 +628,7 @@ class Shopping(LogModel):
         :param user:
             The user who casts the vote
         :param vote:
-            The film id voted for
+            The film index voted for
             can be 1, 2, 3, 4, 5, 6, 7, 8,
             ><Too many~~~~
             This makes me feel determined to develop another nosql backend.
@@ -639,7 +639,7 @@ class Shopping(LogModel):
         votes_max=5
 
         if self.state != 'Voting':
-            raise BusinessException("The show cannot be voted now", 3)
+            raise BusinessException("The shopping cannot be voted now", 3)
         vote_log = [x.content[-1] for x in
             Log.select().where(
                 Log.model == "Shopping",

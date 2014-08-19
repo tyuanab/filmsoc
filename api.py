@@ -731,6 +731,7 @@ class ShoppingResource(LoggedRestResource):
         else:
             return self.model.select().where(self.model.state != "Draft")
 
+    #obj is pre-exist obj, data is the request data
     def validate_data(self, data, obj=None):
         data = super(ShoppingResource, self).validate_data(data, obj)
         if g.modify_flag == 'edit':
@@ -750,12 +751,12 @@ class ShoppingResource(LoggedRestResource):
                     # Forbid such behaviour
                     raise BusinessException("Cannot turn back to Draft")
             if obj.state != 'Ready' and data['state'] == 'Ready':
-                # settting a show to open
+                # settting a shopping to open
                 # there can only be one open show at any time
                 if Shopping.select().where(
                             Shopping.state == 'Ready'
                         ).exists():
-                    raise BusinessException("There can be one Open Shopping"
+                    raise BusinessException("There can be one Ready Shopping"
                                             " at a time")
 
         return data
@@ -786,7 +787,8 @@ class ShoppingResource(LoggedRestResource):
                     for y in ['reserved_by', 'hold_by', 'due_at']:
                         setattr(disk, y, None)
                     disk.save()
-                else: raise BusinessException("only draft disks can be put onto shopping vote")
+                else:
+                    raise BusinessException("only draft disks can be put onto shopping vote")
 
 
         # editing previous rfs will not change availability of disks
@@ -815,13 +817,12 @@ class ShoppingResource(LoggedRestResource):
                     """
                 #if instance is changed to Passed, flag all disks back to Draft so they can be available later.
                 elif instance.state == 'Passed':
-                    largest=instance.to_buy()
                     for x in [1, 2, 3, 4, 5, 6, 7, 8]:
                         disk = getattr(instance, "film_%d" % x)
                         if disk.avail_type == 'ShoppingVoting':
                             disk.avail_tyoe = "Draft"
                             disk.save()
-            return instance
+        return instance
 
     def get_urls(self):
         return (
