@@ -71,7 +71,7 @@ UserForm = model_form(User, field_args={
 DiskForm = model_form(Disk, field_args={
     'disk_type': dict(validators=[
         InputRequired(message="Disk Type missing"),
-        AnyOf(['A', 'B'], message="Invalid Disk Type")
+        AnyOf(['A', 'B', 'C', 'D'], message="Invalid Disk Type")
     ]),
     'show_year': dict(validators=[
         InputRequired(message="Missing show year"),
