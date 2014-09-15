@@ -104,7 +104,7 @@ class CASAuth(Auth):
                             return response
 
                     # redirect to front server
-                    return redirect('%s%s' % 
+                    return redirect('%s#%s' % 
                                     (
                                         self.app.config['FRONT_SERVER'],
                                         next_url
