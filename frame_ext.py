@@ -82,6 +82,10 @@ class CASAuth(Auth):
             status, username, cookie = flask_cas.login(
                     self.app.config['AUTH_SERVER'],
                     ticket)
+
+            import logging
+            logging.info("status:%s, username:%s, cookie:%s" % (status, username, cookie))
+
             if status == flask_cas.CAS_OK: # success
                 try:
                     user = self.User.select().where(
