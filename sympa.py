@@ -128,6 +128,7 @@ class Sympa(object):
         :param emails:
             The accounts to replace current ones
         """
+        #use the set datastructure's set operations to generate the difference sets
         current_set = set(self.get_list(mailing_list))
         target_set = set(emails)
         self.del_email(mailing_list, list(current_set - target_set))
